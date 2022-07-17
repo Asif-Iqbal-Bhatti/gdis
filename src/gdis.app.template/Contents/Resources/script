@@ -15,16 +15,14 @@ def getdisplay():
     fileuid = os.stat(os.path.join('/tmp/.X11-unix',file))[stat.ST_UID]
     if str(fileuid) == str(uid):
       displaymatch = dir_re.search(file)
-      display = ':'+displaymatch.group(1)+'.0'
-      return display
-      break
+      return ':' + displaymatch[1] + '.0'
   return None
 
 if __name__ == '__main__':
 
   home = os.environ['HOME']
   os.environ['GDIS_START_DIR'] = home
-  error_file = file(home + '/gdis_debug', 'w')
+  error_file = file(f'{home}/gdis_debug', 'w')
   error_file.write("Starting GDIS...\n")
   error_file.write(str(os.environ))
   error_file.write('\n')
@@ -35,12 +33,12 @@ if __name__ == '__main__':
   uid = str(os.getuid())
   tmpdir = '/tmp'
 
-  pixbuf_file_name = os.path.join(tmpdir,uid+'-gdk-pixbuf.loaders')
-  pangorc_file_name = os.path.join(tmpdir,uid+'-pangorc')
-  gtkimmodules_file_name = os.path.join(tmpdir,uid+'-gtk.immodules')
-  pangomodules_file_name = os.path.join(tmpdir,uid+'-pango.modules')
+  pixbuf_file_name = os.path.join(tmpdir, f'{uid}-gdk-pixbuf.loaders')
+  pangorc_file_name = os.path.join(tmpdir, f'{uid}-pangorc')
+  gtkimmodules_file_name = os.path.join(tmpdir, f'{uid}-gtk.immodules')
+  pangomodules_file_name = os.path.join(tmpdir, f'{uid}-pango.modules')
   pangoxaliases_file_name = os.path.join(thisdir,'etc/pango/pangox.aliases')
-  getx11_file_name = os.path.join(tmpdir,uid+'-getx11.sh')
+  getx11_file_name = os.path.join(tmpdir, f'{uid}-getx11.sh')
   gdis_exe = os.path.join(thisdir, 'gdis')
   startX11 = os.path.join(thisdir, 'startX11.scpt')
 #  X11 = os.path.join('/Applications/Utilities', 'X11.app')
@@ -84,26 +82,26 @@ if __name__ == '__main__':
   os.environ['GDK_PIXBUF_MODULE_FILE'] = pixbuf_file_name
 
   user = os.getenv('LOGNAME')
-  if user == None:
+  if user is None:
     user = str(os.getenv('USER'))
-  if user == None:
+  if user is None:
     user = pwd.getpwuid(uid)[0]
-  if user == None:
+  if user is None:
     error_file.write('No user id found.\n')
     sys.exit()
-  error_file.write('user: '+str(user)+'\n')
+  error_file.write(f'user: {str(user)}' + '\n')
 
   # See if X11 is running if the DISPLAY variable isn't set.
   display = os.getenv('DISPLAY')
-  if display == None:
+  if display is None:
     display = getdisplay()
-    if not display == None:
+    if display is not None:
       error_file.write('Using DISPLAY from existing X11: %s\n' % (str(display),))
   else:
     error_file.write('Using DISPLAY from environment: %s\n' % (str(display),))
 
   # Start X11 and get the display.
-  if display == None:
+  if display is None:
 
     # Have to make a ~/.xinitrc file otherwise we will get an xterm appearing.
     if not os.access(xinitrc,os.F_OK):
@@ -131,9 +129,8 @@ if __name__ == '__main__':
 
       # Look for display owned by current user.
       display = getdisplay()
-      if display==None:
+      if display is None:
         display = "bla"
-#       display = ":0.0"
       else:
         found = True
         error_file.write('Started X11 and setting DISPLAY to: %s\n' % (str(display),))
@@ -147,8 +144,7 @@ if __name__ == '__main__':
 
   # start gdis
   error_file.write('command: %s\n' % ('\"' + gdis_exe + '\"' + ' ' + string.join(sys.argv[2:])),)
-  flags = ['gdis']
-  flags.append(sys.argv[2:])
+  flags = ['gdis', sys.argv[2:]]
   #status = os.spawnv(os.P_WAIT,gdis_exe,sys.argv[2:])
   status, output = commands.getstatusoutput('\"' + gdis_exe + '\"' + ' ' + string.join(sys.argv[2:]))
   error_file.write('output: %s\n' % (output,))
